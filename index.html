@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Team Tables with Lock Column Feature</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .selected {
+      background-color: green;
+      color: white;
+    }
+    .locked {
+      background-color: #ccc !important;
+      pointer-events: none;
+    }
+    #clearButton, #historyButton {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    #highestTotal, #historyLog {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .history-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border: 1px solid #ddd;
+    }
+    .restore-button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .lock-button {
+      margin-left: 5px;
+      font-size: 12px;
+      padding: 2px 5px;
+      cursor: pointer;
+    }
+    #lockPopup {
+      display: none;
+      position: absolute;
+      border: 1px solid #333;
+      background-color: #fff;
+      padding: 10px;
+      z-index: 9999;
+      box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+    }
+    #lockPopup button {
+      display: block;
+      margin-bottom: 5px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Interactive Number Tables</h2>
+
+<div>
+  <label for="teamName1">Team Name (Table 1): </label>
+  <input type="text" id="teamName1" placeholder="Enter Team 1 Name">
+</div>
+
+<h3 id="tableTitle1">Table 1</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Roles</th>
+      <th>Kick 1 <button class="lock-button" data-col="1" data-table="1">⚙️</button></th>
+      <th>Kick 2 <button class="lock-button" data-col="2" data-table="1">⚙️</button></th>
+      <th>Kick 3 <button class="lock-button" data-col="3" data-table="1">⚙️</button></th>
+      <th>Kick 4 <button class="lock-button" data-col="4" data-table="1">⚙️</button></th>
+      <th>Kick 5 <button class="lock-button" data-col="5" data-table="1">⚙️</button></th>
+      <th>TOTAL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Kicker</td>
+      <td class="clickable" id="table1-kicker-kick1">1</td>
+      <td class="clickable" id="table1-kicker-kick2">1.25</td>
+      <td class="clickable" id="table1-kicker-kick3">1.5</td>
+      <td class="clickable" id="table1-kicker-kick4">1.75</td>
+      <td class="clickable" id="table1-kicker-kick5">2</td>
+      <td id="total1">0</td>
+    </tr>
+    <tr>
+      <td>Goalposts</td>
+      <td class="clickable" id="table1-goalposts-kick1">0.5</td>
+      <td class="clickable" id="table1-goalposts-kick2">0.5</td>
+      <td class="clickable" id="table1-goalposts-kick3">0.5</td>
+      <td class="clickable" id="table1-goalposts-kick4">0.5</td>
+      <td class="clickable" id="table1-goalposts-kick5">0.5</td>
+      <td id="total2">0</td>
+    </tr>
+    <tr>
+      <td>Keeper</td>
+      <td class="clickable" id="table1-keeper-kick1">1</td>
+      <td class="clickable" id="table1-keeper-kick2">1</td>
+      <td class="clickable" id="table1-keeper-kick3">1</td>
+      <td class="clickable" id="table1-keeper-kick4">1</td>
+      <td class="clickable" id="table1-keeper-kick5">1</td>
+      <td id="total3">0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div>
+  <label for="teamName2">Team Name (Table 2): </label>
+  <input type="text" id="teamName2" placeholder="Enter Team 2 Name">
+</div>
+
+<h3 id="tableTitle2">Table 2</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Roles</th>
+      <th>Kick 1 <button class="lock-button" data-col="1" data-table="2">⚙️</button></th>
+      <th>Kick 2 <button class="lock-button" data-col="2" data-table="2">⚙️</button></th>
+      <th>Kick 3 <button class="lock-button" data-col="3" data-table="2">⚙️</button></th>
+      <th>Kick 4 <button class="lock-button" data-col="4" data-table="2">⚙️</button></th>
+      <th>Kick 5 <button class="lock-button" data-col="5" data-table="2">⚙️</button></th>
+      <th>TOTAL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Kicker</td>
+      <td class="clickable" id="table2-kicker-kick1">1</td>
+      <td class="clickable" id="table2-kicker-kick2">1.25</td>
+      <td class="clickable" id="table2-kicker-kick3">1.5</td>
+      <td class="clickable" id="table2-kicker-kick4">1.75</td>
+      <td class="clickable" id="table2-kicker-kick5">2</td>
+      <td id="total4">0</td>
+    </tr>
+    <tr>
+      <td>Goalposts</td>
+      <td class="clickable" id="table2-goalposts-kick1">0.5</td>
+      <td class="clickable" id="table2-goalposts-kick2">0.5</td>
+      <td class="clickable" id="table2-goalposts-kick3">0.5</td>
+      <td class="clickable" id="table2-goalposts-kick4">0.5</td>
+      <td class="clickable" id="table2-goalposts-kick5">0.5</td>
+      <td id="total5">0</td>
+    </tr>
+    <tr>
+      <td>Keeper</td>
+      <td class="clickable" id="table2-keeper-kick1">1</td>
+      <td class="clickable" id="table2-keeper-kick2">1</td>
+      <td class="clickable" id="table2-keeper-kick3">1</td>
+      <td class="clickable" id="table2-keeper-kick4">1</td>
+      <td class="clickable" id="table2-keeper-kick5">1</td>
+      <td id="total6">0</td>
+    </tr>
+  </tbody>
+</table>
+
+<button id="clearButton">Clear</button>
+<button id="historyButton">History</button>
+<div id="highestTotal">Highest Total: Table 1 - 0</div>
+<div id="historyLog"></div>
+
+<div id="lockPopup">
+  <button id="lockButton">Lock</button>
+  <button id="unlockButton">Unlock</button>
+</div>
+
+<script>
+let totalSums = [0, 0];
+let selectedCells = [];
+let historyLog = [];
+
+document.getElementById("teamName1").addEventListener("input", () => {
+  document.getElementById("tableTitle1").innerText = document.getElementById("teamName1").value || "Table 1";
+});
+document.getElementById("teamName2").addEventListener("input", () => {
+  document.getElementById("tableTitle2").innerText = document.getElementById("teamName2").value || "Table 2";
+});
+
+function handleCellClick(event) {
+  const cell = event.target;
+  if (cell.classList.contains("locked")) return;
+  const value = parseFloat(cell.innerText);
+  const table = cell.closest("table");
+  const tableIndex = Array.from(document.querySelectorAll("table")).indexOf(table);
+
+  cell.classList.toggle("selected");
+  if (cell.classList.contains("selected")) {
+    totalSums[tableIndex] += value;
+    selectedCells.push(cell.id);
+  } else {
+    totalSums[tableIndex] -= value;
+    selectedCells = selectedCells.filter((id) => id !== cell.id);
+  }
+
+  updateTotalDisplay(tableIndex);
+}
+
+function updateTotalDisplay(index) {
+  document.querySelectorAll("table tr:last-child td:last-child")[index].innerText = totalSums[index].toFixed(2);
+  updateHighestTotal();
+}
+
+function updateHighestTotal() {
+  const maxTotal = Math.max(...totalSums);
+  const maxIndex = totalSums.indexOf(maxTotal);
+  const teamNames = [
+    document.getElementById("teamName1").value || "Table 1",
+    document.getElementById("teamName2").value || "Table 2"
+  ];
+  document.getElementById("highestTotal").innerText = `Highest Total: ${teamNames[maxIndex]} - ${maxTotal.toFixed(2)}`;
+}
+
+function clearSelections() {
+  const teamName1 = document.getElementById("teamName1").value || "Table 1";
+  const teamName2 = document.getElementById("teamName2").value || "Table 2";
+
+  historyLog.push({
+    totalSums: [...totalSums],
+    selectedCells: [...selectedCells],
+    teamNames: [teamName1, teamName2]
+  });
+
+  document.querySelectorAll(".selected").forEach(cell => cell.classList.remove("selected"));
+  document.querySelectorAll(".locked").forEach(cell => cell.classList.remove("locked"));
+
+  totalSums = [0, 0];
+  selectedCells = [];
+  updateTotalDisplay(0);
+  updateTotalDisplay(1);
+  updateHighestTotal();
+}
+
+function showHistory() {
+  const container = document.getElementById("historyLog");
+  container.innerHTML = "<h3>History Log:</h3>";
+  if (historyLog.length === 0) {
+    container.innerHTML += "<p>No history yet.</p>";
+    return;
+  }
+
+  historyLog.forEach((entry, i) => {
+    const div = document.createElement("div");
+    div.className = "history-entry";
+    div.innerHTML = `
+      <p>Clear #${i + 1}: 
+      ${entry.teamNames[0]} - ${entry.totalSums[0].toFixed(2)}, 
+      ${entry.teamNames[1]} - ${entry.totalSums[1].toFixed(2)}</p>
+      <button class="restore-button" onclick="restoreState(${i})">Restore</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function restoreState(index) {
+  const data = historyLog[index];
+  totalSums = [...data.totalSums];
+  selectedCells = [...data.selectedCells];
+
+  document.querySelectorAll(".selected").forEach(cell => cell.classList.remove("selected"));
+  document.querySelectorAll(".locked").forEach(cell => cell.classList.remove("locked"));
+
+  selectedCells.forEach(id => {
+    const cell = document.getElementById(id);
+    if (cell) cell.classList.add("selected");
+  });
+
+  document.getElementById("teamName1").value = data.teamNames[0];
+  document.getElementById("teamName2").value = data.teamNames[1];
+  document.getElementById("tableTitle1").innerText = data.teamNames[0];
+  document.getElementById("tableTitle2").innerText = data.teamNames[1];
+
+  updateTotalDisplay(0);
+  updateTotalDisplay(1);
+  updateHighestTotal();
+}
+
+let targetColIndex = null;
+let targetTable = null;
+
+document.querySelectorAll(".lock-button").forEach(button => {
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    targetColIndex = parseInt(button.getAttribute("data-col"));
+    targetTable = document.querySelectorAll("table")[parseInt(button.getAttribute("data-table")) - 1];
+    const popup = document.getElementById("lockPopup");
+    popup.style.left = `${e.pageX}px`;
+    popup.style.top = `${e.pageY}px`;
+    popup.style.display = "block";
+  });
+});
+
+document.getElementById("lockButton").addEventListener("click", () => {
+  if (targetTable && targetColIndex !== null) {
+    targetTable.querySelectorAll("tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("td, th");
+      if (cells[targetColIndex]) {
+        cells[targetColIndex].classList.add("locked");
+      }
+    });
+  }
+  document.getElementById("lockPopup").style.display = "none";
+});
+
+document.getElementById("unlockButton").addEventListener("click", () => {
+  if (targetTable && targetColIndex !== null) {
+    targetTable.querySelectorAll("tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("td, th");
+      if (cells[targetColIndex]) {
+        cells[targetColIndex].classList.remove("locked");
+      }
+    });
+  }
+  document.getElementById("lockPopup").style.display = "none";
+});
+
+document.addEventListener("click", (e) => {
+  const popup = document.getElementById("lockPopup");
+  if (!popup.contains(e.target)) {
+    popup.style.display = "none";
+  }
+});
+
+// Init
+document.querySelectorAll(".clickable").forEach(cell =>
+  cell.addEventListener("click", handleCellClick)
+);
+document.getElementById("clearButton").addEventListener("click", clearSelections);
+document.getElementById("historyButton").addEventListener("click", showHistory);
+</script>
+
+</body>
+</html>
